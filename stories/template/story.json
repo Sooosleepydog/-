@@ -3,7 +3,7 @@
   "id": "ui-test-phone-v2",
   "title": "捡手机",
   "description": "秀恩的 KakaoTalk 开场",
-  "revision": 4,
+  "revision": 5,
   "phone": {
     "owner": "机主",
     "date": "2026-10-25",
@@ -14,39 +14,35 @@
     "passcode": "0412"
   },
   "installedApps": [
-    "appstore",
     {
-      "id": "wechat",
-      "name": "微信",
+      "id": "phone",
       "installed": true,
       "visible": true,
-      "dock": false,
-      "folder": "",
-      "icon": ""
+      "dock": true
     },
     {
-      "id": "douyin",
-      "name": "抖音",
+      "id": "messages",
       "installed": true,
       "visible": true,
-      "dock": false,
-      "folder": "",
-      "icon": ""
+      "dock": true
     },
-    "phone",
-    "messages",
     "contacts",
     "photos",
     {
       "id": "camera",
-      "name": "相机",
       "installed": true,
       "visible": true,
       "dock": true,
+      "name": "相机",
       "folder": "",
       "icon": ""
     },
-    "safari",
+    {
+      "id": "safari",
+      "installed": true,
+      "visible": true,
+      "dock": true
+    },
     "notes",
     "calendar",
     "mail",
@@ -61,31 +57,9 @@
     "find",
     "calculator",
     "settings",
-    "qq",
-    "weibo",
-    "redbook",
-    "bilibili",
-    "alipay",
-    "taobao",
-    "netease",
-    "delivery",
     "forum",
-    "whatsapp",
     "instagram",
-    "tiktok",
     "twitter",
-    "telegram",
-    "discord",
-    "youtube",
-    "line",
-    "snapchat",
-    "facebook",
-    "messenger",
-    "reddit",
-    "spotify",
-    "netflix",
-    "pinterest",
-    "threads",
     "kakao"
   ],
   "contacts": [
