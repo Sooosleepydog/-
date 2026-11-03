@@ -192,11 +192,39 @@ function PhoneRuntime({
     };
   }, [creator, ready]);
   const s = external ?? own;
+  const [instagramPost, setInstagramPost] = useState<Item | null>(null);
+  const [kakaoTarget, setKakaoTarget] = useState("");
+  const [kakaoVisit, setKakaoVisit] = useState(0);
+  const storyNickname = s.ui?.kakao?.playerNickname;
+  const completedKakao = s.ui?.kakao?.mymyKktScriptedSent;
+  const sawInstagram = s.ui?.instagram?.sunwooPostViewed === true;
+  const kakaoItems = work.data.kakao ?? [];
+  const canShowKakao = (item: Item) => {
+    const after = item.meta.after;
+    return !after || (after === "ig-viewed" ? sawInstagram : Array.isArray(completedKakao) && completedKakao.includes(after));
+  };
+  const nextKakaoNotice = kakaoItems.find((item) => item.meta.scriptedNotify === "true" && canShowKakao(item) && !(Array.isArray(completedKakao) && completedKakao.includes(item.id)));
+  const kakaoNotice = nextKakaoNotice ? "KakaoTalk：" + nextKakaoNotice.sender + " · " + nextKakaoNotice.body : "";
+  const shownKakaoNotices = useRef(new Set<string>());
+  useEffect(() => {
+    if (creator || external || app !== "instagram" || !instagramPost || sawInstagram) return;
+    const timer = window.setTimeout(() => setOwn((current) => ({
+      ...current, ui: { ...current.ui, instagram: { ...current.ui?.instagram, sunwooPostViewed: true } },
+    })), 2400);
+    return () => window.clearTimeout(timer);
+  }, [creator, external, app, instagramPost, sawInstagram]);
+  useEffect(() => {
+    if (creator || locked || !ready || !kakaoNotice || shownKakaoNotices.current.has(kakaoNotice)) return;
+    const timer = window.setTimeout(() => {
+      shownKakaoNotices.current.add(kakaoNotice);
+      setBanner(kakaoNotice);
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [creator, locked, ready, kakaoNotice]);
   const instagramNotice = "Instagram：sunwoo 发布了一条内容";
   const sueunProgress = s.ui?.kakao?.mymyKktScriptedSent;
   const instagramUnlocked = !creator && Array.isArray(sueunProgress) && sueunProgress.includes("sueun-kkt-18");
   const instagramNotified = useRef(false);
-  const [instagramPost, setInstagramPost] = useState<Item | null>(null);
   useEffect(() => {
     if (!instagramUnlocked) {
       instagramNotified.current = false;
@@ -314,6 +342,7 @@ function PhoneRuntime({
   const open = (id: string) => {
     if (!work.apps.some((a) => a.id === id && a.installed)) return;
     setApp(id);
+    setKakaoTarget("");
     setKeyboard(false);
     setRecent((v) => [id, ...v.filter((a) => a !== id)].slice(0, 8));
     setFolder("");
@@ -336,7 +365,7 @@ function PhoneRuntime({
   useEffect(() => {
     if (app && !work.apps.some((a) => a.id === app && a.installed)) setApp("");
   }, [app, work.apps]);
-  const displayTime = creator ? work.phone.time : s.time || work.phone.time;
+  const displayTime = creator ? work.phone.time : sawInstagram ? "20:35" : s.time || work.phone.time;
   const plugin = getApp(app);
   useEffect(() => {
     const count = s.notifications.length;
@@ -488,13 +517,15 @@ function PhoneRuntime({
                 origin={launchOrigin}
               >
                 <AppContent
+                  key={app === "kakao" ? kakaoVisit : app}
+                  initialThread={app === "kakao" ? kakaoTarget : ""}
                   app={plugin}
                   name={
                     work.apps.find((a) => a.id === app)?.name ?? plugin.name
                   }
                   items={[
                     ...(app === "instagram" && instagramUnlocked && instagramPost ? [instagramPost] : []),
-                    ...(work.data[app] ?? []),
+                    ...(app === "kakao" && !creator ? kakaoItems.filter(canShowKakao) : work.data[app] ?? []),
                     ...(s.messages[app] ?? []),
                   ]}
                   creator={creator}
@@ -521,7 +552,7 @@ function PhoneRuntime({
                       ),
                     );
                   }}
-                  work={work}
+                  work={typeof storyNickname === "string" && storyNickname ? { ...work, phone: { ...work.phone, owner: storyNickname } } : work}
                 />
               </AppWindow>
             ) : (
@@ -731,6 +762,11 @@ function PhoneRuntime({
               onClick={() => {
                 setBanner("");
                 if (banner === instagramNotice) open("instagram");
+                else if (banner === kakaoNotice && nextKakaoNotice) {
+                  open("kakao");
+                  setKakaoTarget(nextKakaoNotice.title);
+                  setKakaoVisit((value) => value + 1);
+                }
                 else setPanel("notification");
               }}
             >
@@ -903,6 +939,7 @@ function Media({ item }: { item: Item }) {
   );
 }
 function AppContent({
+  initialThread,
   app,
   name,
   items,
@@ -916,6 +953,7 @@ function AppContent({
   onUi,
   work,
 }: {
+  initialThread: string;
   app: AppPlugin;
   name: string;
   items: Item[];
@@ -930,7 +968,7 @@ function AppContent({
   work: Work;
 }) {
   const [detail, setDetail] = useState<Item | null>(null);
-  const [thread, setThread] = useState("");
+  const [thread, setThread] = useState(initialThread);
   const [tab, setTab] = useState(app.tabs[0]);
   const [q, setQ] = useState("");
   const [pw, setPw] = useState("");
