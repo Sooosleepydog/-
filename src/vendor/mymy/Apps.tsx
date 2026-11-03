@@ -67,9 +67,27 @@ export function MymyKakao(p: SkinProps) {
     [draft, setDraft] = useState(""),
     [query, setQuery] = useState(""),
     [menu, setMenu] = useState(false);
-  const list = grouped(p.items),
+  const [sentIds, setSentIds] = useSkinState<string[]>(p, "mymyKktScriptedSent", []);
+  const isScripted = (item: (typeof p.items)[number]) =>
+    item.meta.scriptedReply === "true" || item.meta.scriptedIncoming === "true";
+  const upcoming = p.creator ? undefined : p.items.find((item) =>
+    item.title === p.thread && isScripted(item) && !sentIds.includes(item.id),
+  );
+  const pending = upcoming?.outgoing ? upcoming : undefined;
+  const incoming = upcoming && !upcoming.outgoing ? upcoming : undefined;
+  useEffect(() => {
+    if (!incoming) return;
+    const timer = window.setTimeout(() => {
+      setSentIds([...sentIds, incoming.id]);
+    }, Math.min(4200, 1300 + incoming.body.length * 85));
+    return () => window.clearTimeout(timer);
+  }, [incoming, sentIds, setSentIds]);
+  const visibleItems = p.creator ? p.items : p.items.filter((item) =>
+    !isScripted(item) || sentIds.includes(item.id),
+  );
+  const list = grouped(p.items.filter((item) => visibleItems.includes(item) || item.meta.scriptedOpening === "true")),
     messages = [
-      ...p.items.filter((i) => i.title === p.thread),
+      ...visibleItems.filter((i) => i.title === p.thread),
       ...sent.flatMap((raw, index) => {
         try {
           const entry: unknown = JSON.parse(raw);
@@ -97,6 +115,7 @@ export function MymyKakao(p: SkinProps) {
       }),
     ],
     scroll = useRef<HTMLDivElement>(null);
+  useEffect(() => setDraft(""), [p.thread, pending?.id]);
   useEffect(() => {
     const node = scroll.current;
     if (node) node.scrollTop = node.scrollHeight;
@@ -153,12 +172,20 @@ export function MymyKakao(p: SkinProps) {
                 </div>
               );
             })}
-            {!messages.length && <Blank />}
+            {incoming && <div role="status">{incoming.sender}正在输入…</div>}
+            {!messages.length && !incoming && <Blank />}
           </div>
           <form
             className="kzinp"
             onSubmit={(e) => {
               e.preventDefault();
+              if (incoming) return;
+              if (pending) {
+                if (draft !== pending.body) return;
+                setSentIds([...sentIds, pending.id]);
+                setDraft("");
+                return;
+              }
               if (draft.trim()) {
                 setSent([
                   ...sent,
@@ -181,16 +208,28 @@ export function MymyKakao(p: SkinProps) {
             </button>
             <input
               aria-label="KKT消息"
+              disabled={Boolean(incoming)}
               placeholder="输入消息"
               value={draft}
               maxLength={2000}
-              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (pending && e.key === "Enter" && !e.nativeEvent.isComposing)
+                  e.preventDefault();
+              }}
+              onChange={(e) => {
+                const value = e.target.value;
+                const composing = (e.nativeEvent as InputEvent).isComposing;
+                setDraft(pending && value && !composing ? pending.body : value);
+              }}
+              onCompositionEnd={(e) => {
+                if (pending && e.currentTarget.value) setDraft(pending.body);
+              }}
             />
             <Smile size={22} />
             <button
               className={draft.trim() ? "go" : ""}
               aria-label="发送KKT消息"
-              disabled={!draft.trim()}
+              disabled={!draft.trim() || Boolean(pending && draft !== pending.body)}
             >
               ↑
             </button>
