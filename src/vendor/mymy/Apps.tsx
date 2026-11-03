@@ -126,7 +126,9 @@ export function MymyKakao(p: SkinProps) {
         <>
           <header className="kzth">
             <Back onClick={() => p.onThread("")} />
-            <span className="kzname">{p.thread}</span>
+            <span className="kzname" aria-live="polite">
+              {incoming ? `${incoming.sender}正在输入…` : p.thread}
+            </span>
             <span className="kzpill">
               <button aria-label="聊天菜单" onClick={() => setMenu(!menu)}>
                 <Menu size={21} />
@@ -172,7 +174,6 @@ export function MymyKakao(p: SkinProps) {
                 </div>
               );
             })}
-            {incoming && <div role="status">{incoming.sender}正在输入…</div>}
             {!messages.length && !incoming && <Blank />}
           </div>
           <form
