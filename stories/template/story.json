@@ -1,9 +1,9 @@
 {
   "scriptVersion": 1,
-  "id": "ui-test-phone-v2",
+  "id": "parallel-letters",
   "title": "捡手机",
   "description": "秀恩的 KakaoTalk 开场",
-  "revision": 5,
+  "revision": 6,
   "phone": {
     "owner": "机主",
     "date": "2026-10-25",
