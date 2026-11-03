@@ -57,6 +57,7 @@ import { getApp, type AppPlugin } from "./registry";
 import {
   initialRuntime,
   safeMedia,
+  makeItem,
   type Work,
   type Item,
   type Runtime,
@@ -191,6 +192,49 @@ function PhoneRuntime({
     };
   }, [creator, ready]);
   const s = external ?? own;
+  const instagramNotice = "Instagram：sunwoo 发布了一条内容";
+  const sueunProgress = s.ui?.kakao?.mymyKktScriptedSent;
+  const instagramUnlocked = !creator && Array.isArray(sueunProgress) && sueunProgress.includes("sueun-kkt-18");
+  const instagramNotified = useRef(false);
+  const [instagramPost, setInstagramPost] = useState<Item | null>(null);
+  useEffect(() => {
+    if (!instagramUnlocked) {
+      instagramNotified.current = false;
+      setInstagramPost(null);
+      return;
+    }
+    const controller = new AbortController();
+    const loadImage = async (name: string) => {
+      const response = await fetch(import.meta.env.BASE_URL + name, { signal: controller.signal });
+      if (!response.ok) throw new Error("Instagram image unavailable");
+      const blob = await response.blob();
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+    };
+    void Promise.all([
+      loadImage("0c00a0d3b99d9d1c85626256313fbd1e.jpg"),
+      loadImage("75bfd79a8e593a701b6e3acb2c85fecb.jpg"),
+    ]).then(([avatar, media]) => {
+      if (!controller.signal.aborted) setInstagramPost(makeItem({
+        id: "sunwoo-first-post", title: "手机...💔", body: "手机...💔",
+        sender: "sunwoo", kind: "post", avatar, media,
+      }));
+    }).catch(() => {});
+    return () => controller.abort();
+  }, [instagramUnlocked]);
+  useEffect(() => {
+    if (locked || !instagramPost || instagramNotified.current) return;
+    const show = window.setTimeout(() => {
+      instagramNotified.current = true;
+      setBanner(instagramNotice);
+    }, 900);
+    const hide = window.setTimeout(() => setBanner((value) => value === instagramNotice ? "" : value), 6900);
+    return () => { window.clearTimeout(show); window.clearTimeout(hide); };
+  }, [locked, instagramPost, instagramNotice]);
   const runtimeRef = useRef(s);
   runtimeRef.current = s;
   const update = (next: Runtime) => {
@@ -449,6 +493,7 @@ function PhoneRuntime({
                     work.apps.find((a) => a.id === app)?.name ?? plugin.name
                   }
                   items={[
+                    ...(app === "instagram" && instagramUnlocked && instagramPost ? [instagramPost] : []),
                     ...(work.data[app] ?? []),
                     ...(s.messages[app] ?? []),
                   ]}
@@ -685,7 +730,8 @@ function PhoneRuntime({
               className="device-banner"
               onClick={() => {
                 setBanner("");
-                setPanel("notification");
+                if (banner === instagramNotice) open("instagram");
+                else setPanel("notification");
               }}
             >
               <AppIcon
