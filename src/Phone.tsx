@@ -255,14 +255,14 @@ function PhoneRuntime({
     return () => controller.abort();
   }, [instagramUnlocked]);
   useEffect(() => {
-    if (locked || !instagramPost || instagramNotified.current) return;
+    if (locked || app !== "kakao" || !instagramPost || sawInstagram || instagramNotified.current) return;
     const show = window.setTimeout(() => {
       instagramNotified.current = true;
       setBanner(instagramNotice);
     }, 900);
     const hide = window.setTimeout(() => setBanner((value) => value === instagramNotice ? "" : value), 6900);
     return () => { window.clearTimeout(show); window.clearTimeout(hide); };
-  }, [locked, instagramPost, instagramNotice]);
+  }, [app, locked, instagramPost, instagramNotice, sawInstagram]);
   const runtimeRef = useRef(s);
   runtimeRef.current = s;
   const update = (next: Runtime) => {
@@ -761,7 +761,11 @@ function PhoneRuntime({
               className="device-banner"
               onClick={() => {
                 setBanner("");
-                if (banner === instagramNotice) open("instagram");
+                if (banner === instagramNotice) {
+                  const current = runtimeRef.current;
+                  update({ ...current, ui: { ...current.ui, instagram: { ...current.ui?.instagram, mymyTab: "主页" } } });
+                  open("instagram");
+                }
                 else if (banner === kakaoNotice && nextKakaoNotice) {
                   open("kakao");
                   setKakaoTarget(nextKakaoNotice.title);
