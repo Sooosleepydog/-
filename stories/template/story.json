@@ -3,7 +3,7 @@
   "id": "ui-test-phone-v2",
   "title": "捡手机",
   "description": "秀恩的 KakaoTalk 开场",
-  "revision": 3,
+  "revision": 4,
   "phone": {
     "owner": "机主",
     "date": "2026-10-25",
@@ -241,6 +241,87 @@
           "body": "那下午要不要去手机店看看",
           "senderId": "sueun",
           "title": "秀恩",
+          "meta": {
+            "scriptedIncoming": "true"
+          }
+        },
+        {
+          "id": "sueun-kkt-10",
+          "title": "秀恩",
+          "body": "我下午约了私教课呢",
+          "senderId": "owner",
+          "meta": {
+            "scriptedReply": "true"
+          }
+        },
+        {
+          "id": "sueun-kkt-11",
+          "title": "秀恩",
+          "body": "要不你帮我把手机拿去看看",
+          "senderId": "owner",
+          "meta": {
+            "scriptedReply": "true"
+          }
+        },
+        {
+          "id": "sueun-kkt-12",
+          "title": "秀恩",
+          "body": "我下课后再一起去逛逛",
+          "senderId": "owner",
+          "meta": {
+            "scriptedReply": "true"
+          }
+        },
+        {
+          "id": "sueun-kkt-13",
+          "title": "秀恩",
+          "body": "行啊 那下午在老地方见",
+          "senderId": "sueun",
+          "meta": {
+            "scriptedIncoming": "true"
+          }
+        },
+        {
+          "id": "sueun-kkt-14",
+          "title": "秀恩",
+          "body": "你手机密码多少来着？",
+          "senderId": "sueun",
+          "meta": {
+            "scriptedIncoming": "true"
+          }
+        },
+        {
+          "id": "sueun-kkt-15",
+          "title": "秀恩",
+          "body": "0412",
+          "senderId": "owner",
+          "meta": {
+            "scriptedReply": "true"
+          }
+        },
+        {
+          "id": "sueun-kkt-16",
+          "title": "秀恩",
+          "body": "这到底是啥意思ㅋㅋㅋ 哪个前任生日？",
+          "senderId": "sueun",
+          "meta": {
+            "scriptedIncoming": "true"
+          }
+        },
+        {
+          "id": "sueun-kkt-17",
+          "title": "秀恩",
+          "body": "滚呢 是我家门牌号 我懒得想了",
+          "senderId": "owner",
+          "meta": {
+            "scriptedReply": "true"
+          }
+        },
+        {
+          "id": "sueun-kkt-18",
+          "title": "秀恩",
+          "body": "ㅋㅋㅋㅋ知道了 下午见",
+          "senderId": "sueun",
           "meta": {
             "scriptedIncoming": "true"
           }
