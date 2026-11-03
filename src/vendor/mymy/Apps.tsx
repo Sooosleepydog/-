@@ -75,6 +75,8 @@ export function MymyKakao(p: SkinProps) {
   );
   const pending = upcoming?.outgoing ? upcoming : undefined;
   const incoming = upcoming && !upcoming.outgoing ? upcoming : undefined;
+  const asksNickname = pending?.meta.scriptedNickname === "true";
+  const [nickname, setNickname] = useSkinState<string>(p, "playerNickname", "");
   useEffect(() => {
     if (!incoming) return;
     const timer = window.setTimeout(() => {
@@ -85,7 +87,7 @@ export function MymyKakao(p: SkinProps) {
   const visibleItems = p.creator ? p.items : p.items.filter((item) =>
     !isScripted(item) || sentIds.includes(item.id),
   );
-  const list = grouped(p.items.filter((item) => visibleItems.includes(item) || item.meta.scriptedOpening === "true")),
+  const list = grouped(p.items.filter((item) => visibleItems.includes(item) || item.meta.scriptedOpening === "true" || item.meta.scriptedNotify === "true")),
     messages = [
       ...visibleItems.filter((i) => i.title === p.thread),
       ...sent.flatMap((raw, index) => {
@@ -166,7 +168,7 @@ export function MymyKakao(p: SkinProps) {
                     className={"kzbub" + (m.media ? " kzimg" : "")}
                     onClick={() => m.meta.local !== "true" && read(p, m)}
                   >
-                    {m.media ? <Media item={m} /> : m.body}
+                    {m.media ? <Media item={m} /> : m.meta.scriptedNickname === "true" ? nickname : m.body}
                   </button>
                   {!m.outgoing && run.last && (
                     <span className="kzt">{m.time.slice(-5)}</span>
@@ -182,7 +184,8 @@ export function MymyKakao(p: SkinProps) {
               e.preventDefault();
               if (incoming) return;
               if (pending) {
-                if (draft !== pending.body) return;
+                if (asksNickname ? !draft.trim() : draft !== pending.body) return;
+                if (asksNickname) setNickname(draft.trim());
                 setSentIds([...sentIds, pending.id]);
                 setDraft("");
                 return;
@@ -210,9 +213,9 @@ export function MymyKakao(p: SkinProps) {
             <input
               aria-label="KKT消息"
               disabled={Boolean(incoming)}
-              placeholder="输入消息"
+              placeholder={asksNickname ? "输入你的昵称" : "输入消息"}
               value={draft}
-              maxLength={2000}
+              maxLength={asksNickname ? 24 : 2000}
               onKeyDown={(e) => {
                 if (pending && e.key === "Enter" && !e.nativeEvent.isComposing)
                   e.preventDefault();
@@ -220,17 +223,17 @@ export function MymyKakao(p: SkinProps) {
               onChange={(e) => {
                 const value = e.target.value;
                 const composing = (e.nativeEvent as InputEvent).isComposing;
-                setDraft(pending && value && !composing ? pending.body : value);
+                setDraft(pending && !asksNickname && value && !composing ? pending.body : value);
               }}
               onCompositionEnd={(e) => {
-                if (pending && e.currentTarget.value) setDraft(pending.body);
+                if (pending && !asksNickname && e.currentTarget.value) setDraft(pending.body);
               }}
             />
             <Smile size={22} />
             <button
               className={draft.trim() ? "go" : ""}
               aria-label="发送KKT消息"
-              disabled={!draft.trim() || Boolean(pending && draft !== pending.body)}
+              disabled={!draft.trim() || Boolean(pending && !asksNickname && draft !== pending.body)}
             >
               ↑
             </button>
