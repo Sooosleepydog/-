@@ -141,6 +141,9 @@ function PhoneRuntime({
   const [recent, setRecent] = useState<string[]>([]);
   const appSnapshots = useRef(new Map<string, HTMLElement>());
   const [banner, setBanner] = useState("");
+  const openingNoticeShown = useRef(false);
+  const openingMessage = work.data.kakao?.find((item) => item.meta.scriptedOpening === "true");
+  const openingNotice = openingMessage ? "KakaoTalk：" + openingMessage.sender + " · " + openingMessage.body : "";
   const noticesSeen = useRef(0);
   const [contextApp, setContextApp] = useState("");
   const [deviceScale, setDeviceScale] = useState(0.84);
@@ -277,6 +280,13 @@ function PhoneRuntime({
   };
   const installedApps = work.apps.filter((a) => a.installed);
   const apps = installedApps.filter((a) => a.visible);
+  useEffect(() => {
+    if (creator || locked || !work.phone.notifications || !openingNotice || openingNoticeShown.current) return;
+    openingNoticeShown.current = true;
+    const show = window.setTimeout(() => setBanner(openingNotice), 750);
+    const hide = window.setTimeout(() => setBanner((value) => value === openingNotice ? "" : value), 5250);
+    return () => { window.clearTimeout(show); window.clearTimeout(hide); };
+  }, [creator, locked, openingNotice, work.phone.notifications]);
   const unlock = (pin = "") => {
     if (!work.phone.passcode || pin === work.phone.passcode) {
       setLocked(false);
@@ -683,7 +693,8 @@ function PhoneRuntime({
               className="device-banner"
               onClick={() => {
                 setBanner("");
-                setPanel("notification");
+                if (banner === openingNotice) open("kakao");
+                else setPanel("notification");
               }}
             >
               <AppIcon
