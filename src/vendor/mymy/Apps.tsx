@@ -89,17 +89,13 @@ export function MymyKakao(p: SkinProps) {
   const visibleItems = p.creator ? p.items : p.items.filter((item) =>
     !isScripted(item) || sentIds.includes(item.id) || (immediateIncoming && item.id === incoming?.id),
   );
-  const list = grouped(p.items.filter((item) => visibleItems.includes(item) || item.meta.scriptedOpening === "true" || item.meta.scriptedNotify === "true")),
-    messages = [
-      ...visibleItems.filter((i) => i.title === p.thread),
-      ...sent.flatMap((raw, index) => {
+  const localMessages = sent.flatMap((raw, index) => {
         try {
           const entry: unknown = JSON.parse(raw);
           if (
             !Array.isArray(entry) ||
             entry.length !== 3 ||
-            !entry.every((v) => typeof v === "string") ||
-            entry[0] !== p.thread
+            !entry.every((v) => typeof v === "string")
           )
             return [];
           return [
@@ -116,9 +112,13 @@ export function MymyKakao(p: SkinProps) {
         } catch {
           return [];
         }
-      }),
-    ],
-    scroll = useRef<HTMLDivElement>(null);
+      });
+  const list = grouped([
+    ...p.items.filter((item) => visibleItems.includes(item) || item.meta.scriptedOpening === "true" || item.meta.scriptedNotify === "true"),
+    ...localMessages,
+  ]);
+  const messages = [...visibleItems, ...localMessages].filter((item) => item.title === p.thread);
+  const scroll = useRef<HTMLDivElement>(null);
   useEffect(() => setDraft(""), [p.thread, pending?.id]);
   useEffect(() => {
     const node = scroll.current;
@@ -313,17 +313,19 @@ export function MymyKakao(p: SkinProps) {
             {list
               .filter((g) => g.title.includes(query.trim()))
               .map((g) => {
-                const last = g.items.at(-1)!;
+                const contact = g.items.find((item) => !item.outgoing && item.avatar);
+                const last = [...g.items].reverse().find((item) => visibleItems.includes(item) || item.meta.local === "true") ?? g.items[0];
+                const preview = last.media ? "[图片]" : last.meta.scriptedNickname === "true" ? nickname : last.body.replaceAll("{玩家昵称}", nickname || "神秘人");
                 return (
                   <button
                     className="kzkr kzkcr"
                     key={g.title}
                     onClick={() => p.onThread(g.title)}
                   >
-                    <Avatar name={last.sender || g.title} src={last.avatar} />
+                    <Avatar name={g.title} src={contact?.avatar} />
                     <span className="kzkn">
                       <b>{g.title}</b>
-                      <small>{tab === "好友" ? last.sender : last.body}</small>
+                      <small>{preview}</small>
                     </span>
                     <span className="kzkmt">
                       {last.time.slice(-5)}
