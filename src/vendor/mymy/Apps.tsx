@@ -198,7 +198,7 @@ export function MymyKakao(p: SkinProps) {
                 setDraft("");
                 return;
               }
-              if (draft.trim()) {
+              if (p.creator && draft.trim()) {
                 setSent([
                   ...sent,
                   JSON.stringify([
@@ -220,21 +220,24 @@ export function MymyKakao(p: SkinProps) {
             </button>
             <input
               aria-label="KKT消息"
-              disabled={Boolean(incoming)}
-              placeholder={asksNickname ? "输入你的昵称" : "输入消息"}
+              disabled={Boolean(incoming) || (!p.creator && !pending)}
+              readOnly={!p.creator && !asksNickname}
+              inputMode={p.creator || asksNickname ? "text" : "none"}
+              style={{ fontSize: 16 }}
+              placeholder={asksNickname ? "输入你的昵称" : pending ? "点此填入回复" : "输入消息"}
               value={draft}
               maxLength={asksNickname ? 24 : 2000}
+              onClick={() => {
+                if (pending && !asksNickname) setDraft(pending.body);
+              }}
               onKeyDown={(e) => {
-                if (pending && e.key === "Enter" && !e.nativeEvent.isComposing)
+                if (pending && e.key === "Enter" && !e.nativeEvent.isComposing) {
                   e.preventDefault();
+                  if (!asksNickname) setDraft(pending.body);
+                }
               }}
               onChange={(e) => {
-                const value = e.target.value;
-                const composing = (e.nativeEvent as InputEvent).isComposing;
-                setDraft(pending && !asksNickname && value && !composing ? pending.body : value);
-              }}
-              onCompositionEnd={(e) => {
-                if (pending && !asksNickname && e.currentTarget.value) setDraft(pending.body);
+                if (p.creator || asksNickname) setDraft(e.target.value);
               }}
             />
             <Smile size={22} />
