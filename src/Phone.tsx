@@ -218,9 +218,9 @@ function PhoneRuntime({
     const timer = window.setTimeout(() => {
       shownKakaoNotices.current.add(kakaoNotice);
       setBanner(kakaoNotice);
-    }, 900);
+    }, nextKakaoNotice?.id === "repair-a-5" ? 4200 : 900);
     return () => window.clearTimeout(timer);
-  }, [creator, locked, ready, kakaoNotice]);
+  }, [creator, locked, ready, kakaoNotice, nextKakaoNotice?.id]);
   const instagramNotice = "Instagram：sunwoo 发布了一条内容";
   const sueunProgress = s.ui?.kakao?.mymyKktScriptedSent;
   const instagramUnlocked = !creator && Array.isArray(sueunProgress) && sueunProgress.includes("sueun-kkt-18");
@@ -365,7 +365,7 @@ function PhoneRuntime({
   useEffect(() => {
     if (app && !work.apps.some((a) => a.id === app && a.installed)) setApp("");
   }, [app, work.apps]);
-  const displayTime = creator ? work.phone.time : sawInstagram ? "20:35" : s.time || work.phone.time;
+  const displayTime = creator ? work.phone.time : Array.isArray(completedKakao) && completedKakao.includes("repair-a-5") ? "14:30" : sawInstagram ? "20:35" : s.time || work.phone.time;
   const plugin = getApp(app);
   useEffect(() => {
     const count = s.notifications.length;
