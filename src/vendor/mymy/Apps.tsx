@@ -1,7 +1,7 @@
 /* React/data adapters for dudwo5/Mymy UI templates: kt/ktn/KHD/bub,
  * igHome/igProfile/igDM/igSheet, xHome. See NOTICE.txt for permission.
  * Author content, DOM globals, timers and media dependencies are excluded. */
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Search,
@@ -45,8 +45,9 @@ export function messageRun(items: Item[], index: number) {
     first:
       !previous ||
       previous.outgoing !== m.outgoing ||
-      previous.sender !== m.sender,
-    last: !next || next.outgoing !== m.outgoing || next.sender !== m.sender,
+      previous.sender !== m.sender ||
+      previous.meta.chatDate !== m.meta.chatDate,
+    last: !next || next.outgoing !== m.outgoing || next.sender !== m.sender || next.meta.chatDate !== m.meta.chatDate,
   };
 }
 const read = (p: SkinProps, i: Item) =>
@@ -142,8 +143,13 @@ export function MymyKakao(p: SkinProps) {
             {messages.map((m, i) => {
               const run = messageRun(messages, i);
               return (
+                <Fragment key={m.id}>
+                  {m.meta.chatDate && m.meta.chatDate !== messages[i - 1]?.meta.chatDate && (
+                    <div style={{ textAlign: "center", margin: "14px 0", fontSize: 12 }}>
+                      {m.meta.chatDate}
+                    </div>
+                  )}
                 <div
-                  key={m.id}
                   className={
                     "kzm " +
                     (m.outgoing ? "kzmy" : "kzot") +
@@ -175,6 +181,7 @@ export function MymyKakao(p: SkinProps) {
                     <span className="kzt">{m.time.slice(-5)}</span>
                   )}
                 </div>
+                </Fragment>
               );
             })}
             {!messages.length && !incoming && <Blank />}
