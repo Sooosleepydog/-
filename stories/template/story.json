@@ -1422,12 +1422,56 @@
     ],
     "forum": [
       {
-        "id": "test-item-forum",
-        "title": "测试内容",
-        "body": "这是一条测试内容。",
-        "sender": "测试用户",
-        "kind": "text",
-        "meta": {}
+        "id": "ambient-forum-1",
+        "title": "下班晚了还有什么能吃？",
+        "body": "地铁出来已经快十点了。便利店便当吃了一周，想换口热的。",
+        "sender": "二号出口",
+        "kind": "post",
+        "time": "21:42",
+        "likes": 12,
+        "comments": [
+          "红豆鲫鱼饼:二号出口往里走，有家紫菜包饭开到十一点。",
+          "锅里有汤:那家鱼饼汤也可以单点！"
+        ]
+      },
+      {
+        "id": "ambient-forum-2",
+        "title": "周末想看点轻松的综艺",
+        "body": "最好是随便点开一集就能看懂的，最近脑子实在转不动。",
+        "sender": "橘子汽水",
+        "kind": "post",
+        "time": "18:16",
+        "likes": 7,
+        "comments": [
+          "窗边座:找那种一群人去乡下开店的，看他们切菜我就很放松。",
+          "夜班企鹅:我反而爱看猜歌，每次都觉得自己能赢。"
+        ]
+      },
+      {
+        "id": "ambient-forum-3",
+        "title": "楼下洗衣店有只猫",
+        "body": "它每天都趴在门口那块蓝垫子上。今天下雨，老板给它换了块干的。",
+        "sender": "洗衣机转圈",
+        "kind": "post",
+        "time": "13:05",
+        "likes": 21,
+        "comments": [
+          "猫先下班:猫：今天的员工福利已收到。",
+          "过路面包:我上周去洗被套，它连眼睛都没睁。"
+        ]
+      },
+      {
+        "id": "ambient-forum-4",
+        "title": "演出散场后一直在循环那首歌",
+        "body": "现场本来是冲着主打去的，结果最喜欢的是安可前那首慢歌。",
+        "sender": "耳机只剩一边",
+        "kind": "post",
+        "time": "10:38",
+        "likes": 4,
+        "comments": [
+          "晚场票根:懂，散场路上反而最想听那首。",
+          "蓝色帆布袋:我回家第一件事就是去翻歌单。"
+        ]
       }
     ],
     "instagram": [
@@ -1442,12 +1486,56 @@
     ],
     "twitter": [
       {
-        "id": "test-item-twitter",
-        "title": "测试内容",
-        "body": "这是一条测试内容。",
-        "sender": "测试用户",
-        "kind": "text",
-        "meta": {}
+        "id": "ambient-x-1",
+        "title": "夜班咖啡",
+        "body": "店员问我要不要去冰，我说去。回家发现自己本来点的就是热拿铁。",
+        "sender": "@latte_after6",
+        "kind": "post",
+        "time": "21:42",
+        "likes": 12,
+        "comments": [
+          "@warm_bread:你们俩都好有礼貌，谁也没拆穿。",
+          "@subway_window:这是下班之后的大脑。"
+        ]
+      },
+      {
+        "id": "ambient-x-2",
+        "title": "老歌随机播放",
+        "body": "随机到一首以为早就忘了的歌，前奏刚响我就跟着唱了。",
+        "sender": "@rewind_room",
+        "kind": "post",
+        "time": "18:16",
+        "likes": 7,
+        "comments": [
+          "@tape_sideb:歌词忘得一干二净，旋律一个音都没丢。",
+          "@rainy_station:然后一晚上都在搜当年的现场。"
+        ]
+      },
+      {
+        "id": "ambient-x-3",
+        "title": "电影散场",
+        "body": "隔壁观众忍到字幕出来才擤鼻涕，我差点递纸，又怕他更尴尬。",
+        "sender": "@ticket_corner",
+        "kind": "post",
+        "time": "13:05",
+        "likes": 21,
+        "comments": [
+          "@small_popcorn:我上次是对方先递给我。",
+          "@ending_credits:片尾灯一亮，大家都假装在找手机。"
+        ]
+      },
+      {
+        "id": "ambient-x-4",
+        "title": "烤面包日记",
+        "body": "早上烤焦两片，第三片终于没焦，抹果酱时掉地上了。",
+        "sender": "@toast_at_noon",
+        "kind": "post",
+        "time": "10:38",
+        "likes": 4,
+        "comments": [
+          "@milk_in_fridge:我宣布今天早餐改吃外卖。",
+          "@crumb_counter:第三片为这场实验付出了太多。"
+        ]
       }
     ]
   },
