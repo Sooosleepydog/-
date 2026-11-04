@@ -175,7 +175,7 @@ export function MymyKakao(p: SkinProps) {
                     className={"kzbub" + (m.media ? " kzimg" : "")}
                     onClick={() => m.meta.local !== "true" && read(p, m)}
                   >
-                    {m.media ? <Media item={m} /> : m.meta.scriptedNickname === "true" ? nickname : m.body}
+                    {m.media ? <Media item={m} /> : m.meta.scriptedNickname === "true" ? nickname : m.body.replaceAll("{玩家昵称}", nickname || "神秘人")}
                   </button>
                   {!m.outgoing && run.last && (
                     <span className="kzt">{m.time.slice(-5)}</span>
