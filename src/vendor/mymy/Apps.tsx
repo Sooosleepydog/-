@@ -75,17 +75,18 @@ export function MymyKakao(p: SkinProps) {
   );
   const pending = upcoming?.outgoing ? upcoming : undefined;
   const incoming = upcoming && !upcoming.outgoing ? upcoming : undefined;
+  const immediateIncoming = incoming?.meta.scriptedNotify === "true";
   const asksNickname = pending?.meta.scriptedNickname === "true";
   const [nickname, setNickname] = useSkinState<string>(p, "playerNickname", "");
   useEffect(() => {
     if (!incoming) return;
     const timer = window.setTimeout(() => {
       setSentIds([...sentIds, incoming.id]);
-    }, Math.min(4200, 1300 + incoming.body.length * 85));
+    }, immediateIncoming ? 0 : Math.min(4200, 1300 + incoming.body.length * 85));
     return () => window.clearTimeout(timer);
-  }, [incoming, sentIds, setSentIds]);
+  }, [incoming, immediateIncoming, sentIds, setSentIds]);
   const visibleItems = p.creator ? p.items : p.items.filter((item) =>
-    !isScripted(item) || sentIds.includes(item.id),
+    !isScripted(item) || sentIds.includes(item.id) || (immediateIncoming && item.id === incoming?.id),
   );
   const list = grouped(p.items.filter((item) => visibleItems.includes(item) || item.meta.scriptedOpening === "true" || item.meta.scriptedNotify === "true")),
     messages = [
@@ -129,7 +130,7 @@ export function MymyKakao(p: SkinProps) {
           <header className="kzth">
             <Back onClick={() => p.onThread("")} />
             <span className="kzname" aria-live="polite">
-              {incoming ? `${incoming.sender}正在输入…` : p.thread}
+              {incoming && !immediateIncoming ? `${incoming.sender}正在输入…` : p.thread}
             </span>
             <span className="kzpill">
               <button aria-label="聊天菜单" onClick={() => setMenu(!menu)}>
