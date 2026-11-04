@@ -145,6 +145,7 @@ function PhoneRuntime({
   const openingMessage = work.data.kakao?.find((item) => item.meta.scriptedOpening === "true");
   const openingNotice = openingMessage ? "KakaoTalk：" + openingMessage.sender + " · " + openingMessage.body : "";
   const noticesSeen = useRef(0);
+  const useStoryWallpaper = openingMessage?.id === "sueun-kkt-1" && work.phone.wallpaper === "apple-wwdc26";
   const [contextApp, setContextApp] = useState("");
   const [deviceScale, setDeviceScale] = useState(0.84);
   const shell = useRef<HTMLDivElement>(null);
@@ -196,6 +197,8 @@ function PhoneRuntime({
   const [kakaoTarget, setKakaoTarget] = useState("");
   const [kakaoVisit, setKakaoVisit] = useState(0);
   const storyNickname = s.ui?.kakao?.playerNickname;
+  const storedKakaoNotices = s.ui?.kakao?.openedStoryNotices;
+  const openedKakaoNotices = Array.isArray(storedKakaoNotices) ? storedKakaoNotices : [];
   const completedKakao = s.ui?.kakao?.mymyKktScriptedSent;
   const sawInstagram = s.ui?.instagram?.sunwooPostViewed === true;
   const kakaoItems = work.data.kakao ?? [];
@@ -205,6 +208,18 @@ function PhoneRuntime({
   };
   const nextKakaoNotice = kakaoItems.find((item) => item.meta.scriptedNotify === "true" && canShowKakao(item) && !(Array.isArray(completedKakao) && completedKakao.includes(item.id)));
   const kakaoNotice = nextKakaoNotice ? "KakaoTalk：" + nextKakaoNotice.sender + " · " + nextKakaoNotice.body : "";
+  const nextKakaoNoticeOpened = !!nextKakaoNotice && openedKakaoNotices.includes(nextKakaoNotice.id);
+  const openingNoticeUnread = !!openingMessage && !openedKakaoNotices.includes(openingMessage.id) && !(Array.isArray(completedKakao) && completedKakao.includes("sueun-kkt-3"));
+  const rememberKakaoNotice = (id: string) => {
+    const current = runtimeRef.current;
+    const kakao = current.ui?.kakao;
+    const opened = kakao?.openedStoryNotices;
+    if (Array.isArray(opened) && opened.includes(id)) return;
+    update({
+      ...current,
+      ui: { ...current.ui, kakao: { ...kakao, openedStoryNotices: [...(Array.isArray(opened) ? opened : []), id] } },
+    });
+  };
   const shownKakaoNotices = useRef(new Set<string>());
   useEffect(() => {
     if (creator || external || app !== "instagram" || !instagramPost || sawInstagram) return;
@@ -214,13 +229,13 @@ function PhoneRuntime({
     return () => window.clearTimeout(timer);
   }, [creator, external, app, instagramPost, sawInstagram]);
   useEffect(() => {
-    if (creator || locked || !ready || !kakaoNotice || shownKakaoNotices.current.has(kakaoNotice)) return;
+    if (creator || locked || !ready || !kakaoNotice || nextKakaoNoticeOpened || shownKakaoNotices.current.has(kakaoNotice)) return;
     const timer = window.setTimeout(() => {
       shownKakaoNotices.current.add(kakaoNotice);
       setBanner(kakaoNotice);
     }, nextKakaoNotice?.id === "repair-a-5" ? 4200 : 900);
     return () => window.clearTimeout(timer);
-  }, [creator, locked, ready, kakaoNotice, nextKakaoNotice?.id]);
+  }, [creator, locked, ready, kakaoNotice, nextKakaoNotice?.id, nextKakaoNoticeOpened]);
   const instagramNotice = "Instagram：sunwoo 发布了一条内容";
   const sueunProgress = s.ui?.kakao?.mymyKktScriptedSent;
   const instagramUnlocked = !creator && Array.isArray(sueunProgress) && sueunProgress.includes("sueun-kkt-18");
@@ -356,6 +371,7 @@ function PhoneRuntime({
     if (!work.phone.passcode || pin === work.phone.passcode) {
       setLocked(false);
       setPinOpen(false);
+      if (openingMessage && openingNoticeUnread && work.phone.notifications) rememberKakaoNotice(openingMessage.id);
       event("password", pin);
     } else {
       setPinError("密码不正确");
@@ -394,6 +410,7 @@ function PhoneRuntime({
       <KeyboardContext.Provider value={setKeyboard}>
         <div
           className={`phone-screen wallpaper-${work.phone.wallpaper} ${locked ? "is-locked" : ""} ${app ? "in-app" : ""} ${keyboard ? "keyboard-open" : ""}`}
+          style={useStoryWallpaper ? { background: `center / cover no-repeat url("${import.meta.env.BASE_URL}IMG_9729.jpeg")` } : undefined}
           data-app={app}
           onDragStart={(e) => e.preventDefault()}
           onPointerDown={(e) => {
@@ -459,8 +476,10 @@ function PhoneRuntime({
             }
           }}
         >
-          <div className="wallpaper-orb orb-one" />
-          <div className="wallpaper-orb orb-two" />
+          {!useStoryWallpaper && <>
+            <div className="wallpaper-orb orb-one" />
+            <div className="wallpaper-orb orb-two" />
+          </>}
           <div className="status-bar">
             <button
               onClick={() =>
@@ -497,7 +516,7 @@ function PhoneRuntime({
                     : work
                 }
                 time={displayTime}
-                notices={openingNotice && work.phone.notifications ? [...s.notifications, openingNotice] : s.notifications}
+                notices={openingNoticeUnread && openingNotice && work.phone.notifications ? [...s.notifications, openingNotice] : s.notifications}
                 onDismiss={(index) => { if (index < s.notifications.length) dismissNotice(index); }}
                 pinOpen={pinOpen}
                 setPinOpen={setPinOpen}
@@ -767,6 +786,7 @@ function PhoneRuntime({
                   open("instagram");
                 }
                 else if (banner === kakaoNotice && nextKakaoNotice) {
+                  rememberKakaoNotice(nextKakaoNotice.id);
                   open("kakao");
                   setKakaoTarget(nextKakaoNotice.title);
                   setKakaoVisit((value) => value + 1);
