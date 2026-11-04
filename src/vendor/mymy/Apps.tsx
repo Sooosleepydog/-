@@ -375,6 +375,7 @@ export function MymyInstagram(p: SkinProps) {
     [story, setStory] = useState(0),
     [draft, setDraft] = useState(""),
     [pop, setPop] = useState("");
+  const [profile, setProfile] = useState<Item | null>(null);
   const posts = p.items.filter(
       (i) => i.folder !== "私信" && i.meta.story !== "true",
     ),
@@ -404,12 +405,20 @@ export function MymyInstagram(p: SkinProps) {
       setSelected(i);
     }
   };
+  const profilePosts = profile ? posts.filter((i) => i.sender === profile.sender) : [];
+  const openProfile = (i: Item) => {
+    setSelected(null);
+    setProfile(i);
+    setTab("个人主页");
+  };
   const post = (i: Item) => (
     <article className="igp" key={i.id}>
       <header className="igph">
-        <Avatar name={i.sender} src={i.avatar} />
+        <button aria-label={`查看 ${i.sender} 的主页`} onClick={() => openProfile(i)}>
+          <Avatar name={i.sender} src={i.avatar} />
+        </button>
         <div className="igpn">
-          <button onClick={() => setTab("个人主页")}>
+          <button onClick={() => openProfile(i)}>
             <b>{i.sender}</b>
           </button>
           <small>{i.meta.location || i.time}</small>
@@ -527,10 +536,10 @@ export function MymyInstagram(p: SkinProps) {
           {!selected && tab === "个人主页" && (
             <>
               <div className="pf">
-                <Avatar name={p.owner || "机主"} />
+                <Avatar name={profile?.sender || p.owner || "机主"} src={profile?.avatar} />
                 <div className="ps">
                   <div>
-                    <b>{posts.length}</b>
+                    <b>{profilePosts.length}</b>
                     <small>帖子</small>
                   </div>
                   <div>
@@ -543,14 +552,14 @@ export function MymyInstagram(p: SkinProps) {
                   </div>
                 </div>
               </div>
-              <p className="pn">{p.owner}</p>
+              <p className="pn">{profile?.sender || p.owner}</p>
               <div className="ptab">
                 <div className="on">
                   <Grid />
                 </div>
               </div>
               <div className="pg2">
-                {posts.map((i) => (
+                {profilePosts.map((i) => (
                   <button key={i.id} onClick={() => openPost(i)}>
                     <Media item={i} />
                   </button>
@@ -597,6 +606,7 @@ export function MymyInstagram(p: SkinProps) {
               }
               onClick={() => {
                 setSelected(null);
+                setProfile(null);
                 setTab(["主页", "搜索", "私信", "个人主页"][n]);
               }}
             >
